@@ -1,0 +1,28 @@
+.venv/
+.venv-*/
+__pycache__/
+*.py[cod]
+
+# Local editor/project settings
+.vscode/
+
+# Build outputs
+build/
+esp32_s3_idf/build/
+
+# ESP-IDF local config with machine/network-specific values
+esp32_s3_idf/sdkconfig
+esp32_s3_idf/sdkconfig.old
+
+# Logs and generated temp files
+*.log
+*.tmp
+
+# Large local model/runtime artifacts
+*.onnx
+*.bin
+*.elf
+*.map
+
+# Keep model metadata, ignore compiled/runtime caches
+g2pW/__pycache__/

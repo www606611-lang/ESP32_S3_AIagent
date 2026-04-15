@@ -1,0 +1,161 @@
+menu "ESP AI Agent"
+
+    config ESP_AI_AGENT_WIFI_SSID
+        string "Wi-Fi SSID"
+        default "YOUR_WIFI_SSID"
+        help
+            Wi-Fi SSID used by the ESP32-S3.
+
+    config ESP_AI_AGENT_WIFI_PASSWORD
+        string "Wi-Fi password"
+        default "YOUR_WIFI_PASSWORD"
+        help
+            Wi-Fi password used by the ESP32-S3. Leave empty for an open network.
+
+    config ESP_AI_AGENT_CHAT_URL
+        string "Chat server URL"
+        default "http://192.168.1.100:8000/chat"
+        help
+            FastAPI /chat endpoint on your PC. Use the PC LAN IP address, not 127.0.0.1.
+
+    config ESP_AI_AGENT_WIFI_MAXIMUM_RETRY
+        int "Maximum Wi-Fi retry count"
+        range 1 20
+        default 8
+
+    config ESP_AI_AGENT_HTTP_TIMEOUT_MS
+        int "HTTP timeout in milliseconds"
+        range 1000 180000
+        default 120000
+
+    config ESP_AI_AGENT_HTTP_RESPONSE_MAX_BYTES
+        int "Maximum HTTP response bytes"
+        range 1024 65536
+        default 32768
+
+    config ESP_AI_AGENT_VOICE_RESPONSE_MAX_BYTES
+        int "Maximum /voice_chat JSON response bytes"
+        range 1024 16384
+        default 4096
+        help
+            Smaller than the text chat response buffer because the ESP32 still holds
+            the recorded audio while reading the /voice_chat JSON response.
+
+    config ESP_AI_AGENT_INPUT_MAX_BYTES
+        int "Maximum serial input bytes"
+        range 64 2048
+        default 512
+
+    config ESP_AI_AGENT_CHAT_TASK_STACK_BYTES
+        int "Chat console task stack bytes"
+        range 4096 32768
+        default 8192
+        help
+            Stack size for the task that reads serial input, sends HTTP chat/TTS requests,
+            parses JSON, and streams WAV audio.
+
+    config ESP_AI_AGENT_ENABLE_SPEAKER
+        bool "Enable MAX98357A speaker output"
+        default y
+        help
+            When enabled, the ESP32-S3 calls /tts after /chat and streams the returned WAV to I2S.
+
+    config ESP_AI_AGENT_AUDIO_SAMPLE_RATE
+        int "Speaker audio sample rate"
+        range 8000 48000
+        default 22050
+        help
+            The TTS endpoint should generate mono 16-bit WAV audio at the same sample rate.
+
+    config ESP_AI_AGENT_SPK_BCLK_GPIO
+        int "MAX98357A BCLK GPIO"
+        range -1 48
+        default 4
+
+    config ESP_AI_AGENT_SPK_WS_GPIO
+        int "MAX98357A LRC/WS GPIO"
+        range -1 48
+        default 5
+
+    config ESP_AI_AGENT_SPK_DOUT_GPIO
+        int "MAX98357A DIN GPIO"
+        range -1 48
+        default 6
+
+    config ESP_AI_AGENT_ENABLE_MICROPHONE
+        bool "Enable ICS43434 microphone input"
+        default y
+        help
+            Enables I2S RX and a serial "/mic" level test command before voice upload/ASR is added.
+
+    config ESP_AI_AGENT_MIC_BCLK_GPIO
+        int "ICS43434 SCK/BCLK GPIO"
+        range -1 48
+        default 7
+
+    config ESP_AI_AGENT_MIC_SAMPLE_RATE
+        int "Microphone sample rate"
+        range 8000 48000
+        default 16000
+        help
+            I2S microphone capture sample rate. 16 kHz is a good default for speech recognition.
+
+    config ESP_AI_AGENT_MIC_WS_GPIO
+        int "ICS43434 WS/LRCLK GPIO"
+        range -1 48
+        default 15
+
+    config ESP_AI_AGENT_MIC_DIN_GPIO
+        int "ICS43434 SD GPIO"
+        range -1 48
+        default 16
+
+    config ESP_AI_AGENT_MIC_SAMPLE_SHIFT
+        int "Microphone 32-bit raw to 16-bit PCM shift"
+        range 8 18
+        default 13
+        help
+            ICS43434 data is read as 32-bit slots. Lower values are louder but can clip;
+            higher values are quieter. 13 is a safer starting point after GPIO wiring works.
+
+    config ESP_AI_AGENT_ENABLE_STATUS_LED
+        bool "Enable onboard WS2812 RGB status LED"
+        default y
+        help
+            Enables a single addressable RGB LED for status: red while listening,
+            green while sending/answering/playing. Most ESP32-S3 dev boards use GPIO48.
+
+    config ESP_AI_AGENT_STATUS_LED_GPIO
+        int "Onboard WS2812 RGB LED GPIO"
+        range -1 48
+        default 48
+
+    config ESP_AI_AGENT_STATUS_LED_BRIGHTNESS
+        int "Status LED brightness"
+        range 0 255
+        default 32
+
+    config ESP_AI_AGENT_ENABLE_PUSH_TO_TALK
+        bool "Enable push-to-talk button"
+        default y
+        help
+            Hold the button to record microphone audio. Release the button to upload
+            the recording to /voice_chat and play the answer.
+
+    config ESP_AI_AGENT_PTT_BUTTON_GPIO
+        int "Push-to-talk button GPIO"
+        range 0 48
+        default 18
+        help
+            Wire one side of the button to this GPIO and the other side to GND.
+            The firmware enables the internal pull-up, so pressed is low.
+
+    config ESP_AI_AGENT_PTT_MAX_RECORD_SECONDS
+        int "Maximum push-to-talk recording seconds"
+        range 1 20
+        default 8
+        help
+            Audio is buffered in RAM until the button is released. Increase only if
+            your board has enough free RAM or PSRAM.
+
+endmenu
